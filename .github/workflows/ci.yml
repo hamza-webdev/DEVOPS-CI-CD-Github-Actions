@@ -1,15 +1,15 @@
-name: Continuous integration
+name: Continuous integration in gitation
 
 on:
   push:
-    branches: 
+    branches:
     - main
   pull_request:
     branches:
-    - main 
-  
+    - main
+
 jobs:
-  frontend-test: 
+  frontend-test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -26,10 +26,10 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Launch test 
+    - name: Launch test
       run: npm test
-  
-  backend-test: 
+
+  backend-test:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -62,7 +62,7 @@ jobs:
     - name: Test
       run: dotnet test --no-restore
 
-  integration-test: 
+  integration-test:
     services:
       mysql:
         image: mysql:8
@@ -84,11 +84,11 @@ jobs:
       working-directory: mysql
 
     - name: Start components
-      run: docker compose -f docker-compose.build.yml up -d 
+      run: docker compose -f docker-compose.build.yml up -d
       env:
         DOCKER_NETWORK: ${{ job.services.mysql.network }}
 
-    - name: Run integration test 
+    - name: Run integration test
       run: |
         wget -q https://github.com/grafana/k6/releases/download/v0.37.0/k6-v0.37.0-linux-amd64.tar.gz
         tar -xzf k6-v0.37.0-linux-amd64.tar.gz
@@ -97,7 +97,7 @@ jobs:
       working-directory: k6
 
     - name: Stop components
-      run: docker compose -f docker-compose.build.yml down 
+      run: docker compose -f docker-compose.build.yml down
 
 
   build-image:
@@ -110,7 +110,7 @@ jobs:
       contents: read
     needs: [integration-test]
     if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-    
+
     steps:
     - uses: actions/checkout@v3
 
@@ -119,7 +119,7 @@ jobs:
 
     - name: Build the Docker image
       uses: docker/build-push-action@v2
-      with: 
+      with:
         context: ${{ matrix.component }}
         file: ${{ matrix.component }}/Dockerfile
         push: true
