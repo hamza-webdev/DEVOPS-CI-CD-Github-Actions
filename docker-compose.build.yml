@@ -1,0 +1,32 @@
+version: "3.9"
+
+networks:
+  default:
+    external:
+      name: ${DOCKER_NETWORK}
+
+services:
+
+  backend:
+    build: ./backend
+    deploy:
+      replicas: 1
+    environment: 
+      - PouletMayo_Db__Host=mysql
+      - PouletMayo_Db__User=root
+      - PouletMayo_Db__Password=${MYSQL_PWD}
+      - PouletMayo_Db__Database=pouletmayo
+    ports:
+      - 8000:8000
+    healthcheck:
+      test: curl --fail http://localhost:8000/health || exit 1
+
+  frontend:
+    build: ./frontend
+    deploy:
+      replicas: 1
+    ports:
+      - 9000:9000
+    healthcheck:
+      test: curl --fail http://localhost:9000 -o /dev/null || exit 1
+
